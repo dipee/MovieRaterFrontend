@@ -1,20 +1,72 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faStar } from '@fortawesome/free-solid-svg-icons'
 
 function MovieDetails(props){
-  
+    let  mov = props.movie;
+    const [highlighted, setHighlighted] = useState(-1);
+    // const [mov, setMovie] = useState(props.movie);
+    const highlightRate = high => evt => {
+        setHighlighted(high)
+    }
+    const rateClicked = rate => evt => {
+        fetch(`http://127.0.0.1:8000/api/movie/${mov.id}/rate_movie/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Token 53b4958afea9ce7af89755cfa8cfc4e401f2aa13'
+            },
+            body :JSON.stringify({stars : rate + 1})
+          })
+         
+          .then(resp => getDetails())
+          .catch(error => console.log(error))
+    } 
+    const getDetails = () =>{
+        fetch(`http://127.0.0.1:8000/api/movie/${mov.id}/`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Token 53b4958afea9ce7af89755cfa8cfc4e401f2aa13'
+            },
+         
+          })
+          .then(resp => resp.json())
+          .then(resp => props.updateMovie(resp))
+          .catch(error => console.log(error))
+    }
     return (
 
-        <div>
-            { props.movie ? (<div>
-                <h1>{props.movie.title}</h1>
-                <p>{props.movie.description}</p>
-                <p>{props.movie.no_of_ratings}</p>
-                <FontAwesomeIcon icon={faStar} />
-            </div>) : null}
+        <React.Fragment>
+            { mov ? (
+            <div>
+                <h1>{mov.title}</h1>
+                <p>{mov.description}</p>
+              
+                <FontAwesomeIcon icon={faStar} className={mov.avg_rating > 0 ? "orange":""} />
+                <FontAwesomeIcon icon={faStar} className={mov.avg_rating > 1 ? "orange":""}/>
+                <FontAwesomeIcon icon={faStar} className={mov.avg_rating > 2 ? "orange":""}/>
+                <FontAwesomeIcon icon={faStar} className={mov.avg_rating > 3 ? "orange":""}/>
+                <FontAwesomeIcon icon={faStar} className={mov.avg_rating > 4 ? "orange":""}/>
+                 ({mov.no_of_ratings})
+                 <div className ="rate-container">
+                     <h3>Rate it</h3>
+                    {[...Array(5)].map((e, i)=>{
+                       return <FontAwesomeIcon key={i} icon={faStar} className={highlighted > i-1 ? "purple":""} 
+                            onMouseEnter={highlightRate(i)}
+                            onMouseLeave={highlightRate(-1)}
+                            onClick = {rateClicked(i)}
+                       />
+                    })
+
+                    }
+                </div>  
+            </div>
             
-        </div>
+
+            ) : null}
+            
+        </React.Fragment>
     )
 }
 
