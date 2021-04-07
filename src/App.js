@@ -3,22 +3,24 @@ import './App.css';
 import MovieList from './components/movie-list';
 import MovieDetails from './components/movie-details';
 import MovieForm from './components/movie-form';
+import {useCookies} from 'react-cookie';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFilm } from '@fortawesome/free-solid-svg-icons';
+import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { useFetch } from './hooks/useFetch';
 function App() {
   const [movies, setMovies] = useState([]);
   const [selectedMovie, setSelectedMovie] = useState(null)
   const [editedMovie, setEditedMovie] = useState(null)
+  const [token, setToken, deleteToken] = useCookies(['mr-token']);
+  const [data, loading, error] = useFetch();
   useEffect(()=>{
-      fetch("http://127.0.0.1:8000/api/movie/", {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Token 53b4958afea9ce7af89755cfa8cfc4e401f2aa13'
-        }
-      })
-      .then(resp => resp.json())
-      .then(resp => setMovies(resp))
-      .catch(error => console.log(error))
-  }, [])
+      setMovies(data);
+  }, [data])
+
+  useEffect(() => {
+    if(!token['mr-token']) window.location.href = '/'
+ }, [token])
 
 
 const loadMovie= movie => {
@@ -50,15 +52,24 @@ const removeClicked = movie => {
   const newMovies=movies.filter(mov => mov.id !== movie.id);
   setMovies(newMovies)
 }
+const logoutUser = () => {
+  deleteToken(['mr-token'])
+}
+  if (loading) return <h1>Loading...</h1>
+  if (error) return <h1>Error Loading movies</h1>
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Movie Rater</h1>
+        <h1>
+          <FontAwesomeIcon icon={faFilm} />
+          <span>Movie Rater</span>
+        </h1>
+        <FontAwesomeIcon icon={faSignOutAlt} onClick={logoutUser} />
       </header>
       <div className="layout">
         <div>
             <MovieList
-             movies={movies}
+            movies={movies}
             movieClicked={loadMovie}  
             editClicked={editClicked}
             removeClicked={removeClicked}

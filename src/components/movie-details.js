@@ -1,11 +1,12 @@
 import React, {useState} from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faStar } from '@fortawesome/free-solid-svg-icons'
-
+import {useCookies} from 'react-cookie';
 function MovieDetails(props){
     let  mov = props.movie;
     const [highlighted, setHighlighted] = useState(-1);
     // const [mov, setMovie] = useState(props.movie);
+    const [token] = useCookies(['mr-token']);
     const highlightRate = high => evt => {
         setHighlighted(high)
     }
@@ -14,7 +15,7 @@ function MovieDetails(props){
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': 'Token 53b4958afea9ce7af89755cfa8cfc4e401f2aa13'
+              'Authorization': `Token ${token['mr-token']}`
             },
             body :JSON.stringify({stars : rate + 1})
           })
@@ -27,7 +28,7 @@ function MovieDetails(props){
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': 'Token 53b4958afea9ce7af89755cfa8cfc4e401f2aa13'
+              'Authorization':  `Token ${token['mr-token']}`
             },
          
           })
